@@ -20,32 +20,37 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Required env vars
-GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
-GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
-AUTH_BASE_URL = os.getenv("AUTH_BASE_URL")
-
-# Validate before proceeding
-if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET or not AUTH_BASE_URL:
-    raise ValueError(
-        "Missing required environment variables!\n"
-        "Please set:\n"
-        "  - GITHUB_CLIENT_ID\n"
-        "  - GITHUB_CLIENT_SECRET\n"
-        "  - AUTH_BASE_URL"
-    )
-    
-github_auth = GitHubProvider(
-    client_id=GITHUB_CLIENT_ID,
-    client_secret=GITHUB_CLIENT_SECRET,
-    base_url=AUTH_BASE_URL,
-    required_scopes=["user:email"]
-)
+# Optional authentication via environment variable
+ENABLE_AUTH = os.getenv("ENABLE_AUTH", "false").lower() == "true"
 
 API = "https://api.frankfurter.dev/v1"
 
-# mcp with GitHub authentication
-mcp = FastMCP("Fx Rates", auth=github_auth)
+# Setup auth if enabled
+if ENABLE_AUTH:
+    GITHUB_CLIENT_ID = os.getenv("GITHUB_CLIENT_ID")
+    GITHUB_CLIENT_SECRET = os.getenv("GITHUB_CLIENT_SECRET")
+    AUTH_BASE_URL = os.getenv("AUTH_BASE_URL")
+    
+    if not GITHUB_CLIENT_ID or not GITHUB_CLIENT_SECRET or not AUTH_BASE_URL:
+        raise ValueError(
+            "ENABLE_AUTH=true but missing required environment variables!\n"
+            "Please set:\n"
+            "  - GITHUB_CLIENT_ID\n"
+            "  - GITHUB_CLIENT_SECRET\n"
+            "  - AUTH_BASE_URL"
+        )
+    
+    github_auth = GitHubProvider(
+        client_id=GITHUB_CLIENT_ID,
+        client_secret=GITHUB_CLIENT_SECRET,
+        base_url=AUTH_BASE_URL,
+        required_scopes=["user:email"]
+    )
+    logger.info("GitHub authentication enabled")
+    mcp = FastMCP("Fx Rates", auth=github_auth)
+else:
+    logger.info("Running without authentication")
+    mcp = FastMCP("Fx Rates")
 
 # Tools
 @mcp.tool
