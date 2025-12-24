@@ -1,0 +1,42 @@
+# Git
+.git/
+.gitignore
+
+# Python
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+*.egg-info/
+dist/
+build/
+
+# Environment files (secrets!)
+.env
+.env.local
+.env.example
+
+# Logs
+*.log
+logs/
+/tmp/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Documentation
+README.md
+
+# Lock files
+uv.lock
+
+# Testing
+.pytest_cache/
+.coverage

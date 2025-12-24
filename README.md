@@ -178,13 +178,82 @@ Filter for application logs only:
 tail -f /tmp/fx-mcp-server.log | grep __main__
 ```
 
+## Docker Support
+
+### Build Docker Image
+
+Build the image for your platform:
+```bash
+# For local testing (uses your machine's architecture)
+docker build -t pavm035/ai-fx-currency-mcp:v1.0 .
+
+# For deployment to cloud platforms (Intel/AMD servers)
+docker build --platform linux/amd64 -t pavm035/ai-fx-currency-mcp:v1.0 .
+
+# For multi-platform support (both ARM and AMD64)
+docker buildx build --platform linux/amd64,linux/arm64 -t pavm035/ai-fx-currency-mcp:v1.0 --push .
+```
+
+### Run Docker Container Locally
+
+```bash
+# Run with environment file
+docker run -p 8080:8080 --env-file .env pavm035/ai-fx-currency-mcp:v1.0
+
+# Or with individual environment variables
+docker run -p 8080:8080 \
+  -e GITHUB_CLIENT_ID=your_client_id \
+  -e GITHUB_CLIENT_SECRET=your_client_secret \
+  -e AUTH_BASE_URL=http://localhost:8080 \
+  -e ENABLE_AUTH=true \
+  pavm035/ai-fx-currency-mcp:v1.0
+```
+
+**Note:** Do NOT use quotes around values in `.env` files when using `--env-file`.
+
+### Push to Docker Hub
+
+```bash
+# Login to Docker Hub
+docker login
+
+# Push the image
+docker push pavm035/ai-fx-currency-mcp:v1.0
+```
+
 ## Deployment
+
+### Deploy to Render.com
+
+1. **Using Pre-built Docker Image:**
+   - Create a new Web Service on Render
+   - Select "Deploy an existing image from a registry"
+   - Image URL: `pavm035/ai-fx-currency-mcp:v1.0`
+   - Add environment variables in Render dashboard
+   - Deploy!
+
+2. **Using GitHub Repository:**
+   - Create a new Web Service on Render
+   - Connect your GitHub repository
+   - Render will automatically detect the Dockerfile
+   - Set environment variables
+   - Deploy!
+
+**Environment Variables for Render:**
+```
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
+AUTH_BASE_URL=https://your-app.onrender.com
+ENABLE_AUTH=true
+```
+
+### Other Cloud Platforms
 
 The server is cloud-ready with stdout logging that works with:
 - AWS ECS/Fargate (CloudWatch Logs)
 - Google Cloud Run (Cloud Logging)
 - Azure Container Apps (Azure Monitor)
-- Any container platform
+- Any container platform with Docker support
 
 ## Development
 
